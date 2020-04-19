@@ -4,6 +4,11 @@ from flask_script import Manager
 from dataclasses import dataclass, field
 from project import app
 
+from sqlalchemy import Integer, ForeignKey, String, Column
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+
+Base = declarative_base()
 
 
 db = SQLAlchemy(app)
@@ -12,22 +17,31 @@ manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 
 
-orders_items = db.Table('order_items',
-    db.Column('order_id', db.Integer, db.ForeignKey('order.id'), primary_key=True),
-    db.Column('item_id', db.Integer, db.ForeignKey('item.id'), primary_key=True)
-)
-
-
 @dataclass
-class User(db.Model):
+class User(Base):
     __tablename__ = 'users'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120), nullable = False)
-    # orders = db.relationship('Order', back_populates='user')
+    id = Column(Integer, primary_key=True)
+    name = Column(String(120), nullable = False)
+    # orders = relationship('Order', backref='user')
 
     def __repr__(self):
         return '<User %r>' % self.id
+
+
+@dataclass
+class Order(Base):
+    __tablename__ = 'orders'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+
+    # user = relationship("User", back_populates="orders")
+
+    # items = db.relationship('OrderItem', secondary=orders_items, backref='order', lazy=True)
+
+    def __repr__(self):
+        return '<Order %d>' % self.id
 
 
 @dataclass
@@ -53,24 +67,12 @@ class Product(db.Model):
 
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(120), nullable = False)
-    description = db.Column(db.Text)
+    # description = db.Column(db.Text)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
 
     def __repr__(self):
         return '<Product %r>' % self.id
 
-
-@dataclass
-class Order(db.Model):
-    __tablename__ = 'orders'
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
-    # items = db.relationship('OrderItem', secondary=orders_items, backref='order', lazy=True)
-
-    def __repr__(self):
-        return '<Order %d>' % self.id
 
 
 @dataclass
@@ -112,21 +114,21 @@ class Item(db.Model):
 #         return '<Image %d>' % self.id
 
 
-@dataclass
-class OrderItem(db.Model):
-    __tablename__ = 'orders_items'
-
-    id = db.Column(db.Integer, primary_key=True)
-    order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
-
-    def __repr__(self):
-        return '<OrderItem %d>' % self.id
-
- # (Sku)Item
-
-
-db.create_all()
-db.session.commit()
+# @dataclass
+# class OrderItem(db.Model):
+#     __tablename__ = 'orders_items'
+#
+#     id = db.Column(db.Integer, primary_key=True)
+#     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
+#
+#     def __repr__(self):
+#         return '<OrderItem %d>' % self.id
+#
+#  # (Sku)Item
+#
+#
+# db.create_all()
+# db.session.commit()
 
 
 

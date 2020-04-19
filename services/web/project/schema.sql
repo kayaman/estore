@@ -46,8 +46,8 @@ CREATE TABLE orders (
   id         SERIAL,
   user_id    INT,
 
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 
