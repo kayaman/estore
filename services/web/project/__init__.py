@@ -8,7 +8,3 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["DATABASE_URL"]
 
 from project import models
 from project import routes
-
-@app.route("/status")
-def status():
-    return jsonify(status = "OK")
